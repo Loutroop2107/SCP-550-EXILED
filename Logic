@@ -1,0 +1,68 @@
+using System.Linq;
+using System.Collections.Generic;
+using UnityEngine;
+using MEC;
+using System;
+using EXILED.Extensions;
+using EXILED;
+using SCP550;
+
+namespace SCP550
+{
+	partial class EventHandlers
+	{
+		public static ReferenceHub SCP550 { get; internal set; }
+
+		private static void RemovePossessedItems()
+		{
+			for (int i = 0; i < scpPickups.Count; i++)
+			{
+				Pickup p = scpPickups.ElementAt(i).Key;
+				if (p != null) p.Delete();
+			}
+			scpPickups.Clear();
+		}
+
+
+		public static void SpawnGhoul(ReferenceHub Ghoul, ReferenceHub player = null, bool full = true)
+		{
+			Ghoul.characterClassManager.SetClassID(RoleType.Tutorial);
+			Ghoul.SetRank("SCP-550", "red");
+			Vector3 pos = player.transform.position;
+			maxHP = Ghoul.playerStats.maxHP;
+			GameCore.Console.singleton.TypeCommand($"/cassie " + Configs.scpspawnripcassie);
+			Timing.CallDelayed(0.5f, () => Ghoul.playerStats.maxHP = Configs.health);
+			Timing.CallDelayed(0.5f, () => Ghoul.playerStats.health = Configs.health);
+			Ghoul.ClearBroadcasts();
+			Ghoul.Broadcast(Configs.spawnGhoulbcmsg, Configs.spawnGhoulbctime);
+			hasTag = !string.IsNullOrEmpty(Ghoul.serverRoles.NetworkMyText);
+			isHidden = !string.IsNullOrEmpty(Ghoul.serverRoles.HiddenBadge);
+			if (isHidden) Ghoul.RefreshTag();
+			Ghoul.SetRank("SCP-550", "red");
+			SCP550 = Ghoul;
+		}
+
+		private static Pickup GetRandomItem()
+		{
+			List<Pickup> pickups = GameObject.FindObjectsOfType<Pickup>().Where(x => !scpPickups.ContainsKey(x)).ToList();
+			return pickups[rand.Next(pickups.Count)];
+		}
+
+		private static void repscp550(bool setRank = true)
+		{
+			if (setRank)
+			{
+				SCP550.SetRank("", "default");
+				if (hasTag) SCP550.RefreshTag();
+				if (isHidden) SCP550.HideTag();
+				SCP550 = null;
+			}
+		}
+
+			private void GrantFF(ReferenceHub player)
+		{
+			player.weaponManager.NetworkfriendlyFire = false;
+			ffPlayers.Remove(player.queryProcessor.PlayerId);
+		}
+	}
+}
