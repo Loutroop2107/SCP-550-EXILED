@@ -1,0 +1,15 @@
+namespace SCP550.API
+{
+	public static class SCP550Data
+	{
+		public static ReferenceHub GetScp550()
+		{
+			return EventHandlers.SCP550;
+		}
+
+		public static void Spawn550(ReferenceHub player)
+		{
+			EventHandlers.SpawnGhoul(player);
+		}
+	}
+}
